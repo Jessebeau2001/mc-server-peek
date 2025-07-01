@@ -1,0 +1,16 @@
+allprojects {
+    group = 'com.jessebeau'
+    version = '1.0-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    test {
+        useJUnitPlatform()
+    }
+}
