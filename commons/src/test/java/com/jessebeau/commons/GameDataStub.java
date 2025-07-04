@@ -1,6 +1,6 @@
 package com.jessebeau.commons;
 
-import com.jessebeau.commons.core.GameDataSource;
+import com.jessebeau.commons.platform.core.GameDataSource;
 
 import java.util.ArrayList;
 import java.util.List;

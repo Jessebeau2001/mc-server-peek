@@ -1,6 +1,6 @@
-package com.jessebeau.serverpeek.core;
+package com.jessebeau.serverpeek.platform;
 
-import com.jessebeau.commons.core.GameDataSource;
+import com.jessebeau.commons.platform.core.GameDataSource;
 import net.minecraft.server.MinecraftServer;
 
 public class FabricServerSource implements GameDataSource {

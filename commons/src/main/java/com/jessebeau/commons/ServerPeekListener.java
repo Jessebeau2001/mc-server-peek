@@ -1,7 +1,8 @@
 package com.jessebeau.commons;
 
+import com.jessebeau.commons.platform.ServiceFactory;
 import com.jessebeau.commons.http.HttpResponseWriter;
-import com.jessebeau.commons.core.GameDataSource;
+import com.jessebeau.commons.platform.core.GameDataSource;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -12,6 +13,7 @@ import java.net.SocketException;
 import static com.jessebeau.commons.http.ContentType.TEXT_PLAIN;
 
 public class ServerPeekListener {
+	public static final int defaultPort = 8081;
 	private static final String HOST = "localhost";
 
 	private final int port;
@@ -77,5 +79,10 @@ public class ServerPeekListener {
 		out.writeLength(resp.length());
 		out.write(resp);
 		out.flush();
+	}
+
+	public static ServerPeekListener defaultServerPeekListener() {
+		var platform = ServiceFactory.newPlatformHelper();
+		return new ServerPeekListener(defaultPort, platform.getDataAdapter());
 	}
 }
