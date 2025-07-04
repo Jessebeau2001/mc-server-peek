@@ -9,8 +9,4 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
-
-    test {
-        useJUnitPlatform()
-    }
 }
