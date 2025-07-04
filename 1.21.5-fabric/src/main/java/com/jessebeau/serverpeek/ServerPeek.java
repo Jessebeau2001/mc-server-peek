@@ -13,7 +13,6 @@ public class ServerPeek implements ModInitializer {
 	private ServerPeekListener listener;
 
 	public static final String MOD_ID = "server-peek";
-
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override
