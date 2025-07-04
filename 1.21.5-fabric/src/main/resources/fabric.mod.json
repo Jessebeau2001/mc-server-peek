@@ -3,11 +3,11 @@
 	"id": "server-peek",
 	"version": "${version}",
 	"name": "Server Peek",
-	"description": "API for server!",
+	"description": "Opens a simple game web API interface",
 	"authors": [ "Jessebeau2001" ],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://github.com/Jessebeau2001/mc-server-peek",
+		"sources": "https://github.com/Jessebeau2001/mc-server-peek"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/server-peek/icon.png",

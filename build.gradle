@@ -1,6 +1,6 @@
 allprojects {
-    group = 'com.jessebeau'
-    version = '1.0-SNAPSHOT'
+    group = maven_group
+    version = mod_version
 
     repositories {
         mavenCentral()
