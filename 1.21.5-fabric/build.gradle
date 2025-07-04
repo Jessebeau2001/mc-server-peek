@@ -21,9 +21,12 @@ dependencies {
 }
 
 loom {
-    mods {
-        "server-peek" {
-            sourceSet sourceSets.main
+    runs {
+        server {
+            server()
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("run")
         }
     }
 }
@@ -34,13 +37,12 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 processResources {
+    from project(":commons").sourceSets.main.resources
     inputs.property "version", project.version
 
     filesMatching("fabric.mod.json") {
         expand "version": inputs.properties.version
     }
-
-    from project(":commons").sourceSets.main.resources
 }
 
 java {
