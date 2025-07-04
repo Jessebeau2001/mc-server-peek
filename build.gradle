@@ -1,12 +1,16 @@
 allprojects {
     group = maven_group
     version = mod_version
-
-    repositories {
-        mavenCentral()
-    }
 }
 
 subprojects {
     apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        compileOnly 'org.jetbrains:annotations:26.0.1'
+    }
 }
