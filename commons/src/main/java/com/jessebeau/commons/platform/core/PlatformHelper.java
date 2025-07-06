@@ -1,8 +1,9 @@
-package com.jessebeau.commons.platform;
+package com.jessebeau.commons.platform.core;
 
-import com.jessebeau.commons.platform.core.GameDataSource;
+import java.io.File;
 
 public interface PlatformHelper {
 	String getPlatformName();
 	GameDataSource getDataAdapter();
+	File getConfigDir();
 }

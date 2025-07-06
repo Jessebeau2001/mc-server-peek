@@ -1,5 +1,7 @@
 package com.jessebeau.commons.platform;
 
+import com.jessebeau.commons.platform.core.PlatformHelper;
+
 import java.util.ServiceLoader;
 
 public class ServiceFactory {

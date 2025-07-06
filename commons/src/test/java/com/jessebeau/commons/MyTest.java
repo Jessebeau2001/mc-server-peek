@@ -41,4 +41,9 @@ public class MyTest {
 			assertEquals("2", response.body());
 		}
 	}
+
+	@Test
+	void testConfig() {
+
+	}
 }

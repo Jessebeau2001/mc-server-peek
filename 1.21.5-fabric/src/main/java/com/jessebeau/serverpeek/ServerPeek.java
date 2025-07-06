@@ -1,7 +1,6 @@
 package com.jessebeau.serverpeek;
 
-import com.jessebeau.commons.Common;
-import com.jessebeau.commons.ServerPeekListener;
+import com.jessebeau.commons.PeekPlatform;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
@@ -13,10 +12,10 @@ public class ServerPeek implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+		PeekPlatform.load(() -> ServerLifecycleEvents.SERVER_STARTED.register(server -> {
 			ServerPeek.server = server;
-			Common.start();
-		});
+			PeekPlatform.start();
+		}));
 	}
 
 	public static Optional<MinecraftServer> getServer() {

@@ -13,7 +13,7 @@ import java.net.SocketException;
 import static com.jessebeau.commons.http.ContentType.TEXT_PLAIN;
 
 public class ServerPeekListener {
-	public static final int defaultPort = 8081;
+	private static final int defaultPort = 8081;
 	private static final String HOST = "localhost";
 
 	private final int port;
@@ -24,8 +24,17 @@ public class ServerPeekListener {
 	private ServerSocket serverSocket;
 
 	public ServerPeekListener(int port, GameDataSource dataGrabber) {
+		if (port <= 0)
+			throw new IllegalArgumentException("Port cannot be a negative number");
+		if (dataGrabber == null)
+			throw new IllegalArgumentException("Game data adapter cannot be null");
+
 		this.port = port;
 		this.dataGrabber = dataGrabber;
+	}
+
+	public int getPort() {
+		return this.port;
 	}
 
 	public void start() throws IOException {
@@ -81,8 +90,12 @@ public class ServerPeekListener {
 		out.flush();
 	}
 
-	public static ServerPeekListener defaultServerPeekListener() {
+	public static ServerPeekListener newServerPeekListener(int port) {
 		var platform = ServiceFactory.newPlatformHelper();
-		return new ServerPeekListener(defaultPort, platform.getDataAdapter());
+		return new ServerPeekListener(port, platform.getDataAdapter());
+	}
+
+	public static ServerPeekListener defaultServerPeekListener() {
+		return newServerPeekListener(defaultPort);
 	}
 }
