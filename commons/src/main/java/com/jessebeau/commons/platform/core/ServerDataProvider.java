@@ -1,5 +1,5 @@
 package com.jessebeau.commons.platform.core;
 
-public interface GameDataSource {
+public interface ServerDataProvider {
 	int getPlayerCount();
 }

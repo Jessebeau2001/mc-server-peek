@@ -2,7 +2,7 @@ package com.jessebeau.commons;
 
 import com.jessebeau.commons.platform.ServiceFactory;
 import com.jessebeau.commons.http.HttpResponseWriter;
-import com.jessebeau.commons.platform.core.GameDataSource;
+import com.jessebeau.commons.platform.core.ServerDataProvider;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -17,13 +17,13 @@ public class ServerPeekListener {
 	private static final String HOST = "localhost";
 
 	private final int port;
-	private final GameDataSource dataGrabber;
+	private final ServerDataProvider dataGrabber;
 
 	private volatile boolean enabled;
 	private Thread listenerThread;
 	private ServerSocket serverSocket;
 
-	public ServerPeekListener(int port, GameDataSource dataGrabber) {
+	public ServerPeekListener(int port, ServerDataProvider dataGrabber) {
 		if (port <= 0)
 			throw new IllegalArgumentException("Port cannot be a negative number");
 		if (dataGrabber == null)
@@ -92,7 +92,8 @@ public class ServerPeekListener {
 
 	public static ServerPeekListener newServerPeekListener(int port) {
 		var platform = ServiceFactory.newPlatformHelper();
-		return new ServerPeekListener(port, platform.getDataAdapter());
+		var dataProvider = platform.getDataProvider().orElseThrow(() -> new IllegalStateException("Cannot start listener without active server"));
+		return new ServerPeekListener(port, dataProvider);
 	}
 
 	public static ServerPeekListener defaultServerPeekListener() {

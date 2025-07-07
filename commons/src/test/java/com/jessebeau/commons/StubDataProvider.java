@@ -1,22 +1,22 @@
 package com.jessebeau.commons;
 
-import com.jessebeau.commons.platform.core.GameDataSource;
+import com.jessebeau.commons.platform.core.ServerDataProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameDataStub implements GameDataSource {
+public class StubDataProvider implements ServerDataProvider {
 	private final List<String> players = new ArrayList<>();
 
-	private GameDataStub() {
+	private StubDataProvider() {
 		players.add("Jessebeau2001");
 		players.add("JesseCam2001");
 	}
 
 	// Eager singleton
-	private static final GameDataStub instance = new GameDataStub();
+	private static final StubDataProvider instance = new StubDataProvider();
 
-	public static GameDataStub getInstance() {
+	public static StubDataProvider getInstance() {
 		return instance;
 	}
 

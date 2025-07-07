@@ -1,9 +1,11 @@
 package com.jessebeau.commons.platform.core;
 
 import java.io.File;
+import java.util.Optional;
 
 public interface PlatformHelper {
 	String getPlatformName();
-	GameDataSource getDataAdapter();
 	File getConfigDir();
+
+	Optional<ServerDataProvider> getDataProvider();
 }

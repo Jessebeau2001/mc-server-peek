@@ -18,7 +18,7 @@ public class MyTest {
 
 	@BeforeAll
 	static void startServer() throws IOException {
-		server = new ServerPeekListener(PORT, GameDataStub.getInstance());
+		server = new ServerPeekListener(PORT, StubDataProvider.getInstance());
 		server.start();
 	}
 

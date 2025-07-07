@@ -1,11 +1,11 @@
 package com.jessebeau.serverpeek.platform;
 
-import com.jessebeau.commons.platform.core.GameDataSource;
+import com.jessebeau.commons.platform.core.ServerDataProvider;
 import com.jessebeau.commons.platform.core.PlatformHelper;
-import com.jessebeau.serverpeek.ServerPeek;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.File;
+import java.util.Optional;
 
 public class FabricPlatformHelper implements PlatformHelper {
 	@Override
@@ -14,8 +14,8 @@ public class FabricPlatformHelper implements PlatformHelper {
 	}
 
 	@Override
-	public GameDataSource getDataAdapter() {
-		return new FabricServerSource(ServerPeek.getServer().orElseThrow());
+	public Optional<ServerDataProvider> getDataProvider() {
+		return FabricServerDataProvider.get();
 	}
 
 	@Override

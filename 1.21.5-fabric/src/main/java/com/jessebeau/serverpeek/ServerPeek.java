@@ -2,6 +2,7 @@ package com.jessebeau.serverpeek;
 
 import com.jessebeau.commons.PeekPlatform;
 import com.jessebeau.serverpeek.command.Commands;
+import com.jessebeau.serverpeek.platform.FabricServerDataProvider;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -21,7 +22,7 @@ public class ServerPeek implements ModInitializer {
 	public void onInitialize() {
 		CommandRegistrationCallback.EVENT.register(ServerPeek::register);
 		PeekPlatform.load(() -> ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-			ServerPeek.server = server;
+			FabricServerDataProvider.setServerInstance(server);
 			PeekPlatform.start();
 		}));
 	}
