@@ -22,77 +22,81 @@ public class Commands {
 	private static final String CMD_DIALECT = "dialect";
 	private static final String CMD_SET = "set";
 
-	private static final SuggestionProvider<ServerCommandSource> DIALECT_SUGGESTIONS = ((context, builder) -> {
-		Dialect.getNames().forEach(builder::suggest);
-		return builder.buildFuture();
-	});
-
 	private static boolean isOperator(ServerCommandSource source) {
 		// 2: Command blocks and ops
 		// 4: only ops, e.g. players and host console (no command blocks)
 		return source.hasPermissionLevel(4);
 	}
 
-	public static LiteralArgumentBuilder<ServerCommandSource> buildPeekCommand() {
+	public static LiteralArgumentBuilder<ServerCommandSource> build() {
 		return literal(CMD_ROOT)
 				.requires(Commands::isOperator)
-				.then(buildPortCommand())
-				.then(buildDialectCommand());
+				.then(PortCommand.build())
+				.then(DialectCommand.build());
 	}
 
-	private static LiteralArgumentBuilder<ServerCommandSource> buildPortCommand() {
-		return literal(CMD_PORT)
-				.executes(Commands::getPortExecutor)
-				.then(buildSetPortCommand());
-	}
+	private static class PortCommand {
+		public static LiteralArgumentBuilder<ServerCommandSource> build() {
+			return literal(CMD_PORT)
+					.executes(PortCommand::get)
+					.then(PortCommand.buildSetCommand());
+		}
 
-	private static LiteralArgumentBuilder<ServerCommandSource> buildSetPortCommand() {
-		return literal(CMD_SET)
-				.then(argument("port", IntegerArgumentType.integer(1, 65535))
-						.executes(Commands::setPortExecutor));
-	}
+		private static LiteralArgumentBuilder<ServerCommandSource> buildSetCommand() {
+			return literal(CMD_SET)
+					.then(argument("port", IntegerArgumentType.integer(1, 65535))
+							.executes(PortCommand::set));
+		}
 
-	private static LiteralArgumentBuilder<ServerCommandSource> buildDialectCommand() {
-		return literal(CMD_DIALECT)
-				.executes(Commands::getDialectExecutor)
-				.then(buildSetDialectCommand());
-	}
-
-	private static LiteralArgumentBuilder<ServerCommandSource> buildSetDialectCommand() {
-		return literal(CMD_SET)
-				.then(argument("dialect", StringArgumentType.string())
-						.suggests(DIALECT_SUGGESTIONS)
-						.executes(Commands::setDialectExecutor));
-	}
-
-	private static int getPortExecutor(CommandContext<ServerCommandSource> context) {
-		var port = PeekPlatform.getPort();
-		context.getSource().sendFeedback(() -> Text.literal("Current configured port is " + port), false);
-		return 1;
-	}
-
-	private static int setPortExecutor(CommandContext<ServerCommandSource> context) {
-		var port = IntegerArgumentType.getInteger(context, "port");
-		PeekPlatform.setPort(port);
-		context.getSource().sendFeedback(() -> Text.literal("Set port to " + port), true);
-		return 1;
-	}
-
-	private static int getDialectExecutor(CommandContext<ServerCommandSource> context) {
-		var dialect = CONFIG.dialect();
-		context.getSource().sendFeedback(() -> Text.literal(String.format("Current configured dialect is '%s'", dialect)), false);
-		return 1;
-	}
-
-	private static int setDialectExecutor(CommandContext<ServerCommandSource> context) {
-		var dialectString = StringArgumentType.getString(context, "dialect");
-		var dialect = Dialect.fromString(dialectString);
-		if (dialect.isPresent()) {
-			context.getSource().sendFeedback(() -> Text.literal(String.format("Dialect set to '%s'", dialect.get())), false);
+		private static int get(CommandContext<ServerCommandSource> context) {
+			var port = PeekPlatform.getPort();
+			context.getSource().sendFeedback(() -> Text.literal("Current configured port is " + port), false);
 			return 1;
-		} else {
-			context.getSource().sendError(Text.literal(String.format("Invalid dialect '%s'", dialectString)));
-			return 0;
+		}
+
+		private static int set(CommandContext<ServerCommandSource> context) {
+			var port = IntegerArgumentType.getInteger(context, "port");
+			PeekPlatform.setPort(port);
+			context.getSource().sendFeedback(() -> Text.literal("Set port to " + port), true);
+			return 1;
+		}
+	}
+
+	private static class DialectCommand {
+		private static final SuggestionProvider<ServerCommandSource> DIALECT_SUGGESTIONS = ((context, builder) -> {
+			Dialect.getNames().forEach(builder::suggest);
+			return builder.buildFuture();
+		});
+
+		public static LiteralArgumentBuilder<ServerCommandSource> build() {
+			return literal(CMD_DIALECT)
+					.executes(DialectCommand::get)
+					.then(buildSetCommand());
+		}
+
+		private static LiteralArgumentBuilder<ServerCommandSource> buildSetCommand() {
+			return literal(CMD_SET)
+					.then(argument("dialect", StringArgumentType.string())
+							.suggests(DIALECT_SUGGESTIONS)
+							.executes(DialectCommand::set));
+		}
+
+		private static int get(CommandContext<ServerCommandSource> context) {
+			var dialect = CONFIG.dialect();
+			context.getSource().sendFeedback(() -> Text.literal(String.format("Current configured dialect is '%s'", dialect)), false);
+			return 1;
+		}
+
+		private static int set(CommandContext<ServerCommandSource> context) {
+			var dialectString = StringArgumentType.getString(context, "dialect");
+			var dialect = Dialect.fromString(dialectString);
+			if (dialect.isPresent()) {
+				context.getSource().sendFeedback(() -> Text.literal(String.format("Dialect set to '%s'", dialect.get())), false);
+				return 1;
+			} else {
+				context.getSource().sendError(Text.literal(String.format("Invalid dialect '%s'", dialectString)));
+				return 0;
+			}
 		}
 	}
 }

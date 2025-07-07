@@ -27,7 +27,7 @@ public class ServerPeek implements ModInitializer {
 	}
 
 	private static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, RegistrationEnvironment environment) {
-		dispatcher.register(Commands.buildPeekCommand());
+		dispatcher.register(Commands.build());
 	}
 
 	public static Optional<MinecraftServer> getServer() {
