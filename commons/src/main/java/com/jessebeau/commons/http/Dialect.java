@@ -1,6 +1,7 @@
 package com.jessebeau.commons.http;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -26,5 +27,9 @@ public enum Dialect {
 
 	public static Optional<Dialect> fromString(String name) {
 		return Optional.ofNullable(VALUES.get(name));
+	}
+
+	public static Collection<String> getNames() {
+		return VALUES.keySet();
 	}
 }

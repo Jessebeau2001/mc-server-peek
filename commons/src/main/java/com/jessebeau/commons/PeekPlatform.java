@@ -53,7 +53,7 @@ public class PeekPlatform {
 		if (listener == null) try {
 			listener = ServerPeekListener.newServerPeekListener(config.port());
 			listener.start();
-			LOGGER.info("Started Peek Server on port {}.", + listener.getPort());
+			LOGGER.info("Started Server Peek on port {}.", + listener.getPort());
 		} catch (IOException e) {
 			LOGGER.error("An error occurred while starting Server Peek:\n{}", e.getMessage());
 		}
@@ -69,5 +69,14 @@ public class PeekPlatform {
 				LOGGER.error("An error occurred while stopping Server Peek:\n{}", e.getMessage());
 			}
 		}
+	}
+
+	public static int getPort() {
+		return ModConfig.get().orElseThrow().port();
+	}
+
+	public static void setPort(int port) {
+		var config = ModConfig.get().orElseThrow();
+		config.port(port);
 	}
 }
