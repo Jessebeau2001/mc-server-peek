@@ -16,18 +16,37 @@ public class PeekPlatform {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static final PlatformHelper PLATFORM = ServiceFactory.newPlatformHelper();
 
+	private static PeekPlatform instance;
+
 	private final ModConfig config;
 	private ServerPeekListener listener;
 
-	private PeekPlatform (ModConfig config) {
+	private PeekPlatform(ModConfig config) {
 		this.config = config;
 	}
 
-	public static void load(Consumer<PeekPlatform> onLoad) {
+	public static synchronized void load(Consumer<PeekPlatform> onLoad) {
+		if (isLoaded()) throw new IllegalStateException("Cannot load platform multiple times");
 		LOGGER.info("Loading Peek Module for {}...", PLATFORM.getPlatformName());
 		var config = ConfigLoader.tryLoad().orElseThrow();
-		var platform = new PeekPlatform(config);
-		onLoad.accept(platform);
+		instance = new PeekPlatform(config);
+
+		if (onLoad != null) {
+			onLoad.accept(instance);
+		}
+	}
+
+	public static boolean isLoaded() {
+		return instance != null;
+	}
+
+	private static void assertLoaded() {
+		if (!isLoaded()) throw new IllegalStateException("Platform not loaded");
+	}
+
+	public static PeekPlatform getInstance() {
+		assertLoaded();
+		return instance;
 	}
 
 	public void start() {
@@ -60,7 +79,7 @@ public class PeekPlatform {
 		this.config.port(port);
 	}
 
-	public ModConfig config() {
+	public ModConfig getConfig() {
 		return this.config;
 	}
 }

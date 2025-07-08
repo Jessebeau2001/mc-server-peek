@@ -2,6 +2,7 @@ package com.jessebeau.commons;
 
 import com.jessebeau.commons.platform.ServiceFactory;
 import com.jessebeau.commons.http.HttpResponseWriter;
+import com.jessebeau.commons.platform.core.PlatformHelper;
 import com.jessebeau.commons.platform.core.ServerDataProvider;
 
 import java.io.*;
@@ -17,20 +18,20 @@ public class ServerPeekListener {
 	private static final String HOST = "localhost";
 
 	private final int port;
-	private final ServerDataProvider dataGrabber;
+	private final PlatformHelper platform;
 
 	private volatile boolean enabled;
 	private Thread listenerThread;
 	private ServerSocket serverSocket;
 
-	public ServerPeekListener(int port, ServerDataProvider dataGrabber) {
+	public ServerPeekListener(int port, PlatformHelper platform) {
 		if (port <= 0)
 			throw new IllegalArgumentException("Port cannot be a negative number");
-		if (dataGrabber == null)
+		if (platform == null)
 			throw new IllegalArgumentException("Game data adapter cannot be null");
 
 		this.port = port;
-		this.dataGrabber = dataGrabber;
+		this.platform = platform;
 	}
 
 	public int getPort() {
@@ -82,18 +83,26 @@ public class ServerPeekListener {
 			System.out.println(line);
 		}
 
-		var resp = String.valueOf(dataGrabber.getPlayerCount());
-		out.writeStatus(200, "OK");
-		out.writeContentType(TEXT_PLAIN);
-		out.writeLength(resp.length());
-		out.write(resp);
-		out.flush();
+		var provider = platform.getDataProvider();
+		if (provider.isPresent()) {
+			var resp = String.valueOf(provider.get().getPlayerCount());
+			out.writeStatus(200, "OK");
+			out.writeContentType(TEXT_PLAIN);
+			out.writeLength(resp.length());
+			out.write(resp);
+			out.flush();
+		} else {
+			final String resp = "Service Unavailable";
+			out.writeStatus(503, resp);
+			out.writeContentType(TEXT_PLAIN);
+			out.writeLength(resp.length());
+			out.write(resp);
+			out.flush();
+		}
 	}
 
 	public static ServerPeekListener newServerPeekListener(int port) {
-		var platform = ServiceFactory.newPlatformHelper();
-		var dataProvider = platform.getDataProvider().orElseThrow(() -> new IllegalStateException("Cannot start listener without active server"));
-		return new ServerPeekListener(port, dataProvider);
+		return new ServerPeekListener(port, ServiceFactory.newPlatformHelper());
 	}
 
 	public static ServerPeekListener defaultServerPeekListener() {

@@ -1,9 +1,7 @@
 package com.jessebeau.serverpeek.command;
 
 import com.jessebeau.commons.PeekPlatform;
-import com.jessebeau.commons.ServerPeekListener;
 import com.jessebeau.commons.http.Dialect;
-import com.jessebeau.serverpeek.ServerPeek;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -15,7 +13,7 @@ import net.minecraft.text.Text;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class Commands {
+public class ServerPeekCommand {
 	private static final String CMD_ROOT = "server-peek";
 	private static final String CMD_PORT = "port";
 	private static final String CMD_DIALECT = "dialect";
@@ -27,35 +25,35 @@ public class Commands {
 		return source.hasPermissionLevel(4);
 	}
 
-	public static LiteralArgumentBuilder<ServerCommandSource> build() {
+	public static LiteralArgumentBuilder<ServerCommandSource> newArgument() {
 		return literal(CMD_ROOT)
-				.requires(Commands::isOperator)
-				.then(PortCommand.build())
-				.then(DialectCommand.build());
+				.requires(ServerPeekCommand::isOperator)
+				.then(PortCommand.newArgument())
+				.then(DialectCommand.newArgument());
 	}
 
 	private static class PortCommand {
-		public static LiteralArgumentBuilder<ServerCommandSource> build() {
+		public static LiteralArgumentBuilder<ServerCommandSource> newArgument() {
 			return literal(CMD_PORT)
 					.executes(PortCommand::get)
-					.then(PortCommand.buildSetCommand());
+					.then(PortCommand.newSetArgument());
 		}
 
-		private static LiteralArgumentBuilder<ServerCommandSource> buildSetCommand() {
+		private static LiteralArgumentBuilder<ServerCommandSource> newSetArgument() {
 			return literal(CMD_SET)
 					.then(argument("port", IntegerArgumentType.integer(1, 65535))
 							.executes(PortCommand::set));
 		}
 
 		private static int get(CommandContext<ServerCommandSource> context) {
-			var port = ServerPeek.platform().getPort();
+			var port = PeekPlatform.getInstance().getPort();
 			context.getSource().sendFeedback(() -> Text.literal("Current configured port is " + port), false);
 			return 1;
 		}
 
 		private static int set(CommandContext<ServerCommandSource> context) {
 			var port = IntegerArgumentType.getInteger(context, "port");
-			ServerPeek.platform().setPort(port);
+			PeekPlatform.getInstance().setPort(port);
 			context.getSource().sendFeedback(() -> Text.literal("Set port to " + port), true);
 			return 1;
 		}
@@ -67,13 +65,13 @@ public class Commands {
 			return builder.buildFuture();
 		});
 
-		public static LiteralArgumentBuilder<ServerCommandSource> build() {
+		public static LiteralArgumentBuilder<ServerCommandSource> newArgument() {
 			return literal(CMD_DIALECT)
 					.executes(DialectCommand::get)
-					.then(buildSetCommand());
+					.then(newSetArgument());
 		}
 
-		private static LiteralArgumentBuilder<ServerCommandSource> buildSetCommand() {
+		private static LiteralArgumentBuilder<ServerCommandSource> newSetArgument() {
 			return literal(CMD_SET)
 					.then(argument("dialect", StringArgumentType.string())
 							.suggests(DIALECT_SUGGESTIONS)
@@ -81,7 +79,7 @@ public class Commands {
 		}
 
 		private static int get(CommandContext<ServerCommandSource> context) {
-			var dialect = ServerPeek.platform().config().dialect();
+			var dialect = PeekPlatform.getInstance().getConfig().dialect();
 			context.getSource().sendFeedback(() -> Text.literal(String.format("Current configured dialect is '%s'", dialect)), false);
 			return 1;
 		}
@@ -90,7 +88,7 @@ public class Commands {
 			var dialectString = StringArgumentType.getString(context, "dialect");
 			var dialect = Dialect.fromString(dialectString);
 			if (dialect.isPresent()) {
-				ServerPeek.platform().config().dialect(dialect.get());
+				PeekPlatform.getInstance().getConfig().dialect(dialect.get());
 				context.getSource().sendFeedback(() -> Text.literal(String.format("Dialect set to '%s'", dialect.get())), false);
 				return 1;
 			} else {

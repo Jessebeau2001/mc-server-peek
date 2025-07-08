@@ -1,7 +1,7 @@
 package com.jessebeau.serverpeek;
 
 import com.jessebeau.commons.PeekPlatform;
-import com.jessebeau.serverpeek.command.Commands;
+import com.jessebeau.serverpeek.command.ServerPeekCommand;
 import com.jessebeau.serverpeek.platform.FabricServerDataProvider;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.ModInitializer;
@@ -13,25 +13,15 @@ import net.minecraft.server.command.ServerCommandSource;
 import static net.minecraft.server.command.CommandManager.*;
 
 public class ServerPeek implements ModInitializer {
-	private static PeekPlatform platform;
-
-	public static PeekPlatform platform() {
-		return platform;
-	}
-
 	@Override
 	public void onInitialize() {
-		CommandRegistrationCallback.EVENT.register(ServerPeek::register);
-		PeekPlatform.load(platform -> {
-			ServerPeek.platform = platform;
-			ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-				FabricServerDataProvider.setServerInstance(server);
-				platform.start();
-			});
-		});
+		PeekPlatform.load(PeekPlatform::start);
+		CommandRegistrationCallback.EVENT.register(ServerPeek::registerCommands);
+		ServerLifecycleEvents.SERVER_STARTED.register(FabricServerDataProvider::setServerInstance);
+		ServerLifecycleEvents.SERVER_STOPPING.register(FabricServerDataProvider::clearServerInstance);
 	}
 
-	private static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, RegistrationEnvironment environment) {
-		dispatcher.register(Commands.build());
+	private static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, RegistrationEnvironment environment) {
+		dispatcher.register(ServerPeekCommand.newArgument());
 	}
 }

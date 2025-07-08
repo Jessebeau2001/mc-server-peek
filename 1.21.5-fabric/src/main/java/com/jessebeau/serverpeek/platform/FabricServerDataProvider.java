@@ -8,7 +8,7 @@ import java.util.Optional;
 public class FabricServerDataProvider implements ServerDataProvider {
 	private static ServerDataProvider instance;
 
-	public static void clearServerInstance() {
+	public static void clearServerInstance(MinecraftServer ignored) {
 		instance = null;
 	}
 
