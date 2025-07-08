@@ -1,8 +1,9 @@
 package com.jessebeau.serverpeek.command;
 
 import com.jessebeau.commons.PeekPlatform;
-import com.jessebeau.commons.conf.ModConfig;
+import com.jessebeau.commons.ServerPeekListener;
 import com.jessebeau.commons.http.Dialect;
+import com.jessebeau.serverpeek.ServerPeek;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -15,8 +16,6 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class Commands {
-	private static final ModConfig CONFIG = ModConfig.get().orElseThrow();
-
 	private static final String CMD_ROOT = "server-peek";
 	private static final String CMD_PORT = "port";
 	private static final String CMD_DIALECT = "dialect";
@@ -49,14 +48,14 @@ public class Commands {
 		}
 
 		private static int get(CommandContext<ServerCommandSource> context) {
-			var port = PeekPlatform.getPort();
+			var port = ServerPeek.platform().getPort();
 			context.getSource().sendFeedback(() -> Text.literal("Current configured port is " + port), false);
 			return 1;
 		}
 
 		private static int set(CommandContext<ServerCommandSource> context) {
 			var port = IntegerArgumentType.getInteger(context, "port");
-			PeekPlatform.setPort(port);
+			ServerPeek.platform().setPort(port);
 			context.getSource().sendFeedback(() -> Text.literal("Set port to " + port), true);
 			return 1;
 		}
@@ -82,7 +81,7 @@ public class Commands {
 		}
 
 		private static int get(CommandContext<ServerCommandSource> context) {
-			var dialect = CONFIG.dialect();
+			var dialect = ServerPeek.platform().config().dialect();
 			context.getSource().sendFeedback(() -> Text.literal(String.format("Current configured dialect is '%s'", dialect)), false);
 			return 1;
 		}
@@ -91,6 +90,7 @@ public class Commands {
 			var dialectString = StringArgumentType.getString(context, "dialect");
 			var dialect = Dialect.fromString(dialectString);
 			if (dialect.isPresent()) {
+				ServerPeek.platform().config().dialect(dialect.get());
 				context.getSource().sendFeedback(() -> Text.literal(String.format("Dialect set to '%s'", dialect.get())), false);
 				return 1;
 			} else {

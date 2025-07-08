@@ -1,6 +1,5 @@
 package com.jessebeau.commons;
 
-import com.google.gson.JsonParseException;
 import com.jessebeau.commons.conf.ConfigLoader;
 import com.jessebeau.commons.conf.ModConfig;
 import com.jessebeau.commons.platform.core.PlatformHelper;
@@ -9,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public class PeekPlatform {
 	private static final String MOD_ID = "server-peek";
@@ -16,40 +16,21 @@ public class PeekPlatform {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static final PlatformHelper PLATFORM = ServiceFactory.newPlatformHelper();
 
-	private static ServerPeekListener listener;
+	private final ModConfig config;
+	private ServerPeekListener listener;
 
-	public static void load(Runnable onLoad) {
+	private PeekPlatform (ModConfig config) {
+		this.config = config;
+	}
+
+	public static void load(Consumer<PeekPlatform> onLoad) {
 		LOGGER.info("Loading Peek Module for {}...", PLATFORM.getPlatformName());
-		try {
-			ConfigLoader.load();
-		} catch (JsonParseException e) {
-			abortLoad("Failed to load config, is the json file malformed? (try deleting the config as a simple fix)", e);
-			return;
-		} catch (IOException e) {
-			abortLoad("An IO Exception occurred while loading: " + e);
-			return;
-		}
-
-		onLoad.run();
+		var config = ConfigLoader.tryLoad().orElseThrow();
+		var platform = new PeekPlatform(config);
+		onLoad.accept(platform);
 	}
 
-	private static void abortLoad() {
-		LOGGER.error("Aborting load...");
-	}
-
-	private static void abortLoad(String message) {
-		LOGGER.error(message);
-		abortLoad();
-	}
-
-	private static void abortLoad(String message, Exception e) {
-		LOGGER.error(e.toString());
-		LOGGER.error(message);
-		abortLoad();
-	}
-
-	public static void start() {
-		var config = ModConfig.get().orElseThrow();
+	public void start() {
 		if (listener == null) try {
 			listener = ServerPeekListener.newServerPeekListener(config.port());
 			listener.start();
@@ -59,7 +40,7 @@ public class PeekPlatform {
 		}
 	}
 
-	public static void stop() {
+	public void stop() {
 		if (listener != null) {
 			try {
 				listener.stop();
@@ -71,12 +52,15 @@ public class PeekPlatform {
 		}
 	}
 
-	public static int getPort() {
-		return ModConfig.get().orElseThrow().port();
+	public int getPort() {
+		return this.config.port();
 	}
 
-	public static void setPort(int port) {
-		var config = ModConfig.get().orElseThrow();
-		config.port(port);
+	public void setPort(int port) {
+		this.config.port(port);
+	}
+
+	public ModConfig config() {
+		return this.config;
 	}
 }

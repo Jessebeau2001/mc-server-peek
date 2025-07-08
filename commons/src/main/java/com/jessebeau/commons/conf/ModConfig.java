@@ -4,37 +4,24 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Since;
 import com.jessebeau.commons.http.Dialect;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.util.Optional;
 
 public class ModConfig {
 	private static final Gson gson = new GsonBuilder()
 			.registerTypeAdapter(Dialect.class, new DialectAdapter())
 			.setPrettyPrinting()
 			.create();
-	private static ModConfig instance = null;
 
 	private final File source;
 	private Data data;
 	private boolean autoSave = false;
 
-	ModConfig(File source) {
+	public ModConfig(File source) {
 		if (source == null)
 			throw new IllegalArgumentException("File source cannot be null");
 
 		this.source = source;
-	}
-
-	static void set(ModConfig config) {
-		instance = config;
-	}
-
-	@Contract(pure = true)
-	public static @NotNull Optional<ModConfig> get() {
-		return Optional.ofNullable(instance);
 	}
 
 	public int port() {
