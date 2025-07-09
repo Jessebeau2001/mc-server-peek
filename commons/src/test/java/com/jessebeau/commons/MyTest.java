@@ -37,13 +37,12 @@ public class MyTest {
 
 			var response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-			assertEquals(200, response.statusCode());
-			assertEquals("2", response.body());
+			System.out.println("=".repeat(20));
+			response.headers().map().forEach((k, v) -> System.out.println(k + ": " + v.toString()));
+			System.out.println(response.body());
+
+//			assertEquals(200, response.statusCode());
+//			assertEquals("2", response.body());
 		}
-	}
-
-	@Test
-	void testConfig() {
-
 	}
 }

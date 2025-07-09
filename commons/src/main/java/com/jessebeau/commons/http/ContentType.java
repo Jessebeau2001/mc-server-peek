@@ -12,6 +12,10 @@ public enum ContentType {
 		this.mimeType = mimeType;
 	}
 
+	public String mimeType() {
+		return this.mimeType;
+	}
+
 	@Override
 	public String toString() {
 		return mimeType;
