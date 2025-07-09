@@ -14,11 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MyTest {
 	private static final int PORT = 8081;
-	private static ServerPeekListener server;
+	private static PeekListener server;
 
 	@BeforeAll
 	static void startServer() throws IOException {
-		server = new ServerPeekListener(PORT, new MockPlatform());
+		server = new PeekListener(PORT, new MockPlatform());
 		server.start();
 	}
 

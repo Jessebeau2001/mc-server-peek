@@ -18,10 +18,11 @@ public class PeekPlatform {
 
 	private static PeekPlatform instance;
 
+	private final PeekListener listener;
 	private final ModConfig config;
-	private ServerPeekListener listener;
 
 	private PeekPlatform(ModConfig config) {
+		this.listener = PeekListener.newPeekListener();
 		this.config = config;
 	}
 
@@ -50,8 +51,8 @@ public class PeekPlatform {
 	}
 
 	public void start() {
-		if (listener == null) try {
-			listener = ServerPeekListener.newServerPeekListener(config.port());
+		try {
+			listener.setPort(config.port());
 			listener.start();
 			LOGGER.info("Started Server Peek on port {}.", + listener.getPort());
 		} catch (IOException e) {
@@ -63,7 +64,6 @@ public class PeekPlatform {
 		if (listener != null) {
 			try {
 				listener.stop();
-				listener = null;
 				LOGGER.info("Stopped Server Peek server.");
 			} catch (IOException e) {
 				LOGGER.error("An error occurred while stopping Server Peek:\n{}", e.getMessage());
