@@ -2,7 +2,7 @@ package com.jessebeau.commons.http;
 
 import com.jessebeau.commons.api.Response;
 import com.jessebeau.commons.api.ResponseWriter;
-import com.jessebeau.commons.data.Serializer;
+import com.jessebeau.commons.function.Serializer;
 
 import java.io.*;
 import java.nio.charset.Charset;

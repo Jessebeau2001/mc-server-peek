@@ -28,7 +28,7 @@ public class MyTest {
 	}
 
 	@Test
-	void test() throws Exception {
+	void get() throws Exception {
 		try (var client = HttpClient.newHttpClient()) {
 			var request = HttpRequest.newBuilder()
 					.uri(new URI("http://localhost:" + PORT))
@@ -41,8 +41,24 @@ public class MyTest {
 			response.headers().map().forEach((k, v) -> System.out.println(k + ": " + v.toString()));
 			System.out.println(response.body());
 
+//			Thread.sleep(1000 * 60);
 //			assertEquals(200, response.statusCode());
 //			assertEquals("2", response.body());
+		}
+	}
+
+	@Test
+	void post() throws Exception {
+		try (var client = HttpClient.newHttpClient()) {
+			var request = HttpRequest.newBuilder()
+					.uri(new URI("http://localhost:" + PORT))
+					.POST(HttpRequest.BodyPublishers.ofString("your request body here"))
+					.build();
+			var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+			System.out.println("=".repeat(10) + "( Response )" + "=".repeat(10));
+			response.headers().map().forEach((k, v) -> System.out.println(k + ": " + v.toString()));
+			System.out.println(response.body());
 		}
 	}
 }

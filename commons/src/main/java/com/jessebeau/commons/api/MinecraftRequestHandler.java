@@ -1,8 +1,9 @@
 package com.jessebeau.commons.api;
 
+import com.jessebeau.commons.function.Handler;
 import com.jessebeau.commons.platform.core.PlatformHelper;
 
-public class MinecraftRequestHandler implements RequestHandler {
+public class MinecraftRequestHandler implements Handler<Request, Response> {
 	private final PlatformHelper platform;
 
 	public MinecraftRequestHandler(PlatformHelper platform) {
