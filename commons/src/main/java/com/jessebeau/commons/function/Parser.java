@@ -36,6 +36,10 @@ public interface Parser<T extends InputStream, R> {
 		public ParseException(Exception e) {
 			super(e);
 		}
+
+		public ParseException(String message, Exception e) {
+			super(message, e);
+		}
 	}
 }
 

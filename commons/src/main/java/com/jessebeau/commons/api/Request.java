@@ -1,7 +1,7 @@
 package com.jessebeau.commons.api;
 
+import com.jessebeau.commons.http.Method;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 public class Request {
 	// Http request line
-	private String method;
+	private Method method;
 	private String path;
 	private String version;
 	// Headers
@@ -20,7 +20,7 @@ public class Request {
 	// Body
 	private final String body; // Make some abstract version of map. E.g. need to be able to look up values in the body from outside request class
 
-	private Request(String method, String path, String version, HeaderMap headers, String body) {
+	private Request(Method method, String path, String version, HeaderMap headers, String body) {
 		this.method = method;
 		this.path = path;
 		this.version = version;
@@ -32,7 +32,7 @@ public class Request {
 		return new RequestBuilder();
 	}
 
-	public String method() {
+	public Method method() {
 		return this.method;
 	}
 
@@ -114,7 +114,7 @@ public class Request {
 
 	public static class RequestBuilder {
 		// Http request line
-		private String method;
+		private Method method;
 		private String path;
 		private String version;
 		// Headers
@@ -126,7 +126,7 @@ public class Request {
 			this.headers = new HeaderMap();
 		}
 
-		public RequestBuilder method(String method) {
+		public RequestBuilder method(Method method) {
 			this.method = method;
 			return this;
 		}

@@ -50,8 +50,16 @@ public final class httpRequestParser implements Parser<InputStream, Request> {
 		var parts = line.split(" ");
 		if (parts.length != 3)
 			throw new ParseException(String.format("Request line has invalid length (expected 3, got %d)", parts.length));
-		builder.method(parts[0])
+		builder.method(parseMethod(parts[0]))
 				.path(parts[1])
 			  	.version(parts[2]);
+	}
+
+	private static Method parseMethod(String value) throws ParseException {
+		try {
+			return Method.valueOf(value);
+		} catch (IllegalArgumentException e) {
+			throw new ParseException(value + " is not a valid HTTP method", e);
+		}
 	}
 }

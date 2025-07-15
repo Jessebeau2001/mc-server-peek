@@ -29,7 +29,7 @@ public class PeekListener {
 	private Thread listenerThread;
 	private ServerSocket serverSocket;
 
-	private PeekListener(
+	public PeekListener(
 			@Range(from = 0, to = 65535) int port,
 			@NotNull Parser<InputStream, Request> requestParser,
 			@NotNull Handler<Request, Response> requestHandler,
@@ -41,13 +41,6 @@ public class PeekListener {
 		this.requestHandler = Objects.requireNonNull(requestHandler);
 		this.responseSerializer = Objects.requireNonNull(responseSerializer);
 		this.responseWriterFactory 	= Objects.requireNonNull(responseWriterFactory);
-	}
-
-	public PeekListener(
-			@Range(from = 0, to = 65535) int port,
-			@NotNull PlatformHelper platform
-	) {
-		this(port, new httpRequestParser(), new MinecraftRequestHandler(Objects.requireNonNull(platform)), ResponseSerializer::toJson, HttpResponseWriter::new);
 	}
 
 	public int getPort() {
