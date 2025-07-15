@@ -11,12 +11,19 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class Request {
-	private final String request;
+	// Http request line
+	private String method;
+	private String path;
+	private String version;
+	// Headers
 	private final HeaderMap headers;
+	// Body
 	private final String body; // Make some abstract version of map. E.g. need to be able to look up values in the body from outside request class
 
-	private Request(String request, HeaderMap headers, String body) {
-		this.request = request;
+	private Request(String method, String path, String version, HeaderMap headers, String body) {
+		this.method = method;
+		this.path = path;
+		this.version = version;
 		this.headers = headers;
 		this.body = body;
 	}
@@ -25,36 +32,52 @@ public class Request {
 		return new RequestBuilder();
 	}
 
-	public @Nullable String getHeader(String key) {
-		return headers.get(key).get();
+	public String method() {
+		return this.method;
+	}
+
+	public String path() {
+		return this.path;
+	}
+
+	public String version() {
+		return this.version;
+	}
+
+	public HeaderMap headers() {
+		return this.headers;
 	}
 
 	public void print(@NotNull Consumer<String> printer) {
-		printer.accept("Request: " + request);
-		headers.forEach((k, v) -> printer.accept("Header: " + k + ": " + v));
-		printer.accept("Body:");
+		printer.accept(method + " " + path + " " + version);
+		headers.forEach((k, v) -> printer.accept(k + ": " + v));
+		printer.accept("");
 		printer.accept(body);
 	}
 
 	public static class HeaderMap {
-		private final Map<String, StringWrapper> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		private final Map<String, String> map;
 
-		public StringWrapper get(String key) {
-			return map.get(key);
+		private HeaderMap() {
+			this.map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		}
+
+		public HeaderValue get(String key) {
+			return new HeaderValue(map.get(key));
 		}
 
 		private void set(String key, String value) {
-			map.put(key, new StringWrapper(value));
+			map.put(key, value);
 		}
 
-		public void forEach(BiConsumer<String, StringWrapper> action) {
+		public void forEach(BiConsumer<String, String> action) {
 			map.forEach(action);
 		}
 
-		public static class StringWrapper {
+		public static class HeaderValue {
 			private final String value;
 
-			private StringWrapper(String value) {
+			private HeaderValue(String value) {
 				this.value = value;
 			}
 
@@ -90,13 +113,17 @@ public class Request {
 	}
 
 	public static class RequestBuilder {
-		private final HeaderMap headers;
+		// Http request line
 		private String method;
-		private String request;
+		private String path;
+		private String version;
+		// Headers
+		private final HeaderMap headers;
+		// Body
 		private String body;
 
 		private RequestBuilder() {
-			headers = new HeaderMap();
+			this.headers = new HeaderMap();
 		}
 
 		public RequestBuilder method(String method) {
@@ -104,8 +131,13 @@ public class Request {
 			return this;
 		}
 
-		public RequestBuilder request(String request) {
-			this.request = request;
+		public RequestBuilder path(String path) {
+			this.path = path;
+			return this;
+		}
+
+		public RequestBuilder version(String version) {
+			this.version = version;
 			return this;
 		}
 
@@ -120,7 +152,11 @@ public class Request {
 		}
 
 		public Request create() {
-			return new Request(request, headers, body);
+			return new Request(method, path, version, headers, body);
+		}
+
+		public String getHeaderValue(String key) {
+			return headers.map.get(key);
 		}
 	}
 }

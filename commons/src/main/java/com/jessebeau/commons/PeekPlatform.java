@@ -22,7 +22,7 @@ public class PeekPlatform {
 	private final ModConfig config;
 
 	private PeekPlatform(ModConfig config) {
-		this.listener = PeekListener.newPeekListener();
+		this.listener = PeekListener.newMinecraftPeekListener();
 		this.config = config;
 	}
 

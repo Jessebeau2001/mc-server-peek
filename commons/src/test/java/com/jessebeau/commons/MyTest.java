@@ -10,7 +10,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MyTest {
 	private static final int PORT = 8081;
@@ -36,14 +36,7 @@ public class MyTest {
 					.build();
 
 			var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-			System.out.println("=".repeat(20));
-			response.headers().map().forEach((k, v) -> System.out.println(k + ": " + v.toString()));
-			System.out.println(response.body());
-
-//			Thread.sleep(1000 * 60);
-//			assertEquals(200, response.statusCode());
-//			assertEquals("2", response.body());
+			printResponse(response);
 		}
 	}
 
@@ -55,10 +48,13 @@ public class MyTest {
 					.POST(HttpRequest.BodyPublishers.ofString("your request body here"))
 					.build();
 			var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-			System.out.println("=".repeat(10) + "( Response )" + "=".repeat(10));
-			response.headers().map().forEach((k, v) -> System.out.println(k + ": " + v.toString()));
-			System.out.println(response.body());
+			printResponse(response);
 		}
+	}
+
+	private static void printResponse(HttpResponse<String> response) {
+		System.out.println("=".repeat(20));
+		response.headers().map().forEach((k, v) -> System.out.println(k + ": " + v.toString()));
+		System.out.println(response.body());
 	}
 }

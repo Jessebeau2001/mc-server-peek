@@ -13,7 +13,6 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
-import java.util.LinkedHashMap;
 import java.util.Objects;
 
 public class PeekListener {
@@ -37,10 +36,10 @@ public class PeekListener {
 			@NotNull Serializer<Response> responseSerializer,
 			@NotNull BiFactory<OutputStream, Serializer<Response>, ResponseWriter> responseWriterFactory
 	) {
-		this.port 					= Preconditions.requireExclusiveRange(port, 0, 65535);
-		this.requestParser 			= Objects.requireNonNull(requestParser);
-		this.requestHandler 		= Objects.requireNonNull(requestHandler);
-		this.responseSerializer 	= Objects.requireNonNull(responseSerializer);
+		this.port = Preconditions.requireExclusiveRange(port, 0, 65535);
+		this.requestParser = Objects.requireNonNull(requestParser);
+		this.requestHandler = Objects.requireNonNull(requestHandler);
+		this.responseSerializer = Objects.requireNonNull(responseSerializer);
 		this.responseWriterFactory 	= Objects.requireNonNull(responseWriterFactory);
 	}
 
@@ -90,10 +89,9 @@ public class PeekListener {
 	private void listen() {
 		while (enabled) try (var clientSocket = serverSocket.accept()) {
 			System.out.println("Connected: " + clientSocket.getRemoteSocketAddress());
-//			readSocket(clientSocket.getInputStream());
-
-			var response = new Response();
 			var request = requestParser.parse(clientSocket.getInputStream());
+			request.print(System.out::println);
+			var response = new Response();
 			requestHandler.handle(request, response);
 			responseWriterFactory.create(clientSocket.getOutputStream(), responseSerializer).write(response);
 		} catch (SocketException e) {
@@ -108,65 +106,14 @@ public class PeekListener {
 		}
 	}
 
-	private void bufferedReadSocket(InputStream in) throws IOException {
-		var reader = new BufferedReader(new InputStreamReader(in));
-		var requestLine = reader.readLine();
-		var headerLines = new LinkedHashMap<String, String>();
-		for (String line; (line = reader.readLine()) != null && !line.isEmpty(); ) {
-			var split = line.split(": ", 2);
-			if (split.length != 2) System.out.println("could not parse: " + line);
-			headerLines.put(split[0], split[1]);
-		}
-
-		System.out.println("Request: " + requestLine);
-		headerLines.forEach((k, v) -> System.out.println("Header: " + k + ": " + v));
-
-		var contentLength = Integer.parseInt(headerLines.get("Content-Length"));
-		char[] buff = new char[contentLength];
-		var bytesRead = reader.read(buff);
-		System.out.println("Bytes read: " + bytesRead);
-		System.out.println("Body:");
-		System.out.println();
-	}
-
-	public Request tryReadSocket(InputStream in) throws Parser.ParseException {
-		try {
-			return readSocket(in);
-		} catch (IOException e) {
-			throw new Parser.ParseException(e);
-		}
-	}
-
-	public Request readSocket(InputStream in) throws IOException {
-		var reader = new BufferedReader(new InputStreamReader(in));
-		var builder = Request.builder()
-				.request(reader.readLine());
-
-		int contentLength = -1;
-		for (String line; (line = reader.readLine()) != null && !line.isEmpty(); ) {
-			var split = line.split(": ", 2);
-			if (split.length != 2) System.out.println("could not parse: " + line);
-			builder.header(split[0], split[1]);
-			if ("Content-Length".equals(split[0])) {
-				contentLength = Integer.parseInt(split[1]);
-			}
-		}
-
-		if (contentLength != -1) {
-			char[] buff = new char[contentLength];
-			var bytesRead = reader.read(buff);
-			builder.body(new String(buff, 0, bytesRead));
-		}
-		var request = builder.create();
-		request.print(System.out::println);
-		return request;
-	}
-
-	public static PeekListener newPeekListener(int port) {
-		return new PeekListener(port, ServiceFactory.newPlatformHelper());
-	}
-
-	public static PeekListener newPeekListener() {
-		return newPeekListener(DEFAULT_PORT);
+	public static PeekListener newMinecraftPeekListener() {
+		var platform = ServiceFactory.newPlatformHelper();
+		return new PeekListener(
+				DEFAULT_PORT,
+				new httpRequestParser(),
+				new MinecraftRequestHandler(Objects.requireNonNull(platform)),
+				ResponseSerializer::toJson,
+				HttpResponseWriter::new
+		);
 	}
 }
