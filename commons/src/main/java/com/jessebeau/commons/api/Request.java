@@ -1,26 +1,27 @@
 package com.jessebeau.commons.api;
 
+import com.jessebeau.commons.api.model.Lookup;
+import com.jessebeau.commons.api.model.MapLookup;
+import com.jessebeau.commons.api.model.Value;
 import com.jessebeau.commons.http.Method;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class Request {
 	// Http request line
-	private Method method;
-	private String path;
-	private String version;
+	private final Method method;
+	private final String path;
+	private final String version;
 	// Headers
-	private final HeaderMap headers;
+	private final Lookup<String, Value> headers;
 	// Body
-	private final String body; // Make some abstract version of map. E.g. need to be able to look up values in the body from outside request class
+	private final Lookup<String, Value> body; // Make some abstract version of map. E.g. need to be able to look up values in the body from outside request class
 
-	private Request(Method method, String path, String version, HeaderMap headers, String body) {
+	private Request(Method method, String path, String version, Lookup<String, Value> headers, Lookup<String, Value> body) {
 		this.method = method;
 		this.path = path;
 		this.version = version;
@@ -44,71 +45,20 @@ public class Request {
 		return this.version;
 	}
 
-	public HeaderMap headers() {
+	public Lookup<String, Value> headers() {
+		return this.headers;
+	}
+
+	public Lookup<String, Value> body() {
 		return this.headers;
 	}
 
 	public void print(@NotNull Consumer<String> printer) {
 		printer.accept(method + " " + path + " " + version);
-		headers.forEach((k, v) -> printer.accept(k + ": " + v));
-		printer.accept("");
-		printer.accept(body);
-	}
-
-	public static class HeaderMap {
-		private final Map<String, String> map;
-
-		private HeaderMap() {
-			this.map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		}
-
-		public HeaderValue get(String key) {
-			return new HeaderValue(map.get(key));
-		}
-
-		private void set(String key, String value) {
-			map.put(key, value);
-		}
-
-		public void forEach(BiConsumer<String, String> action) {
-			map.forEach(action);
-		}
-
-		public static class HeaderValue {
-			private final String value;
-
-			private HeaderValue(String value) {
-				this.value = value;
-			}
-
-			public String get() {
-				return this.value;
-			}
-
-			public int asInt() throws NumberFormatException {
-				return Integer.parseInt(value);
-			}
-
-			public float asFloat() throws NumberFormatException {
-				return Float.parseFloat(value);
-			}
-
-			public double asDouble() throws NumberFormatException {
-				return Double.parseDouble(value);
-			}
-
-			/**
-			 * Note that the passed in values are all sourced from a different machine which could, or rather will at some point, have a different
-			 * DateTimeLocale than this machine.
-			 */
-			public LocalDateTime asLocalDateTime(@NotNull DateTimeFormatter formatter) throws DateTimeParseException {
-				return LocalDateTime.parse(value, formatter);
-			}
-
-			@Override
-			public String toString() {
-				return value;
-			}
+		printer.accept(headers.toString());
+		if (body != null) {
+			printer.accept("");
+			printer.accept(body.toString());
 		}
 	}
 
@@ -117,14 +67,11 @@ public class Request {
 		private Method method;
 		private String path;
 		private String version;
-		// Headers
-		private final HeaderMap headers;
-		// Body
-		private String body;
+		// Parsed Content
+		private @Nullable Lookup<String, Value> headers = null;
+		private @Nullable Lookup<String, Value> body = null;
 
-		private RequestBuilder() {
-			this.headers = new HeaderMap();
-		}
+		private RequestBuilder() { }
 
 		public RequestBuilder method(Method method) {
 			this.method = method;
@@ -141,22 +88,33 @@ public class Request {
 			return this;
 		}
 
-		public RequestBuilder header(String key, String value) {
-			headers.set(key, value);
+		public RequestBuilder headers(Lookup<String, Value> headers) {
+			this.headers = headers;
 			return this;
 		}
 
-		public RequestBuilder body(String body) {
+		public RequestBuilder body(Lookup<String, Value> body) {
 			this.body = body;
 			return this;
 		}
 
-		public Request create() {
-			return new Request(method, path, version, headers, body);
+		public RequestBuilder headers(Map<String, String> map) {
+			return headers(new MapLookup<>(map));
 		}
 
-		public String getHeaderValue(String key) {
-			return headers.map.get(key);
+		public RequestBuilder body(Map<String, String> map) {
+			return body(new MapLookup<>(map));
+		}
+
+		public Request create() {
+			Objects.requireNonNull(headers, "Cannot construct request without headers");
+			return new Request(
+					method,
+					path,
+					version,
+					headers,
+					body
+			);
 		}
 	}
 }

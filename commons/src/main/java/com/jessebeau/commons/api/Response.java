@@ -12,6 +12,12 @@ public class Response {
 	private int statusCode;
 	private String statusMessage;
 
+	public Response(int statusCode, String statusMessage) {
+		this();
+		this.statusCode = statusCode;
+		this.statusMessage = statusMessage;
+	}
+
 	public Response() {
 		this.body = new LinkedHashMap<>();
 	}

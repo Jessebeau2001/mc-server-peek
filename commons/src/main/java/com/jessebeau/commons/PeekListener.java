@@ -3,9 +3,8 @@ package com.jessebeau.commons;
 import com.jessebeau.commons.api.*;
 import com.jessebeau.commons.function.*;
 import com.jessebeau.commons.http.HttpResponseWriter;
-import com.jessebeau.commons.http.httpRequestParser;
+import com.jessebeau.commons.http.HttpRequestParser;
 import com.jessebeau.commons.platform.ServiceFactory;
-import com.jessebeau.commons.platform.core.PlatformHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -84,7 +83,7 @@ public class PeekListener {
 			System.out.println("Connected: " + clientSocket.getRemoteSocketAddress());
 			var request = requestParser.parse(clientSocket.getInputStream());
 			request.print(System.out::println);
-			var response = new Response();
+			var response = new Response(501, "Not Implemented");
 			requestHandler.handle(request, response);
 			responseWriterFactory.create(clientSocket.getOutputStream(), responseSerializer).write(response);
 		} catch (SocketException e) {
@@ -103,7 +102,7 @@ public class PeekListener {
 		var platform = ServiceFactory.newPlatformHelper();
 		return new PeekListener(
 				DEFAULT_PORT,
-				new httpRequestParser(),
+				new HttpRequestParser(),
 				new MinecraftRequestHandler(Objects.requireNonNull(platform)),
 				ResponseSerializer::toJson,
 				HttpResponseWriter::new

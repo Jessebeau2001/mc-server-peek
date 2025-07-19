@@ -10,6 +10,7 @@ public class RequestRouter implements Handler<Request, Response> {
 	private final EnumMap<Method, HashMap<String, Handler<Request, Response>>> methods = new EnumMap<>(Method.class);
 
 	public RequestRouter() {
+		// Pre populate method map
 		for (var method : Method.values()) {
 			methods.put(method, new HashMap<>(0));
 		}

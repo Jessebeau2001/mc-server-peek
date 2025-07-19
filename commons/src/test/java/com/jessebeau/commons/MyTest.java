@@ -1,10 +1,10 @@
 package com.jessebeau.commons;
 
+import com.google.gson.JsonParser;
 import com.jessebeau.commons.api.*;
 import com.jessebeau.commons.function.Handler;
 import com.jessebeau.commons.http.HttpResponseWriter;
-import com.jessebeau.commons.http.Method;
-import com.jessebeau.commons.http.httpRequestParser;
+import com.jessebeau.commons.http.HttpRequestParser;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import static com.jessebeau.commons.http.Method.GET;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class MyTest {
 	private static final int PORT = 8081;
@@ -26,7 +25,7 @@ public class MyTest {
 	static void startServer() throws IOException {
 		server = new PeekListener(
 				PORT,
-				new httpRequestParser(),
+				new HttpRequestParser(),
 				newCustomHandler(),
 //				new MinecraftRequestHandler(new MockPlatform()),
 				ResponseSerializer::toJson,
@@ -80,7 +79,21 @@ public class MyTest {
 
 	private static void printResponse(HttpResponse<String> response) {
 		System.out.println("=".repeat(20));
+		System.out.println("status code: " + response.statusCode());
 		response.headers().map().forEach((k, v) -> System.out.println(k + ": " + v.toString()));
 		System.out.println(response.body());
+	}
+
+	private static final String jsonString = """
+			{
+			  "name": "Alice",
+			  "age": 30,
+			  "isMember": true
+			}
+			""";
+
+	@Test
+	void myTest2() {
+		var jObj = JsonParser.parseString(jsonString).getAsJsonObject();
 	}
 }
